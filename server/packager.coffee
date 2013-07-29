@@ -8,7 +8,6 @@ Packager =
     index = -1 * extension.length
 
     validFiles = _.filter files, (filename) -> filename[index..] == extension
-    console.dir validFiles
 
     async.map validFiles, (filename, next) ->
       fullFilename = "#{ dir }/#{ filename }"
