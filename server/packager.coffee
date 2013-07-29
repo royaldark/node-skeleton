@@ -27,13 +27,16 @@ Packager =
     compiled = Util.compile _.flatten(contents).join('\n\n')
     next(null, compiled)
 
-  packageTemplates: ->
+  packageTemplates: (next) ->
     views = {}
 
-    for file in fs.readdirSync './templates' when file[-5..] == '.html'
-        views[file[0...-5]] = "#{ fs.readFileSync "./templates/#{ file }" }"
+    await fs.readdir './templates', defer err, files
+    return next(err) if err
 
-    "var templates = #{ JSON.stringify(views) };"
+    await Packager._getContents files, './templates', '.html', defer err, templates
+    return next(err) if err
+
+    next(null, "var templates = #{ JSON.stringify(templates) };")
 
 
 module.exports = Packager

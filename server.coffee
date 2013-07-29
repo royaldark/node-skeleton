@@ -62,13 +62,15 @@ startServer = ->
         res.send css
 
       app.get '/*', (req, res) ->
-        data =
-          views: Packager.packageTemplates()
-
-        await Packager.packageCoffeeFiles defer err, clientJS
+        await async.parallel [
+          Packager.packageTemplates
+          Packager.packageCoffeeFiles
+        ], defer err, results
         return next(err) if err
 
-        _.extend data, { clientJS }
+        data =
+          views: results[0]
+          clientJS: results[1]
 
         content = swig.compileFile('index.html').render(data)
         res.send content
