@@ -63,10 +63,14 @@ startServer = ->
 
       app.get '/*', (req, res) ->
         data =
-          clientJS: Packager.packageCoffeeFiles()
           views: Packager.packageTemplates()
 
-        content = swig.compileFile("index.html").render(data)
+        await Packager.packageCoffeeFiles defer err, clientJS
+        return next(err) if err
+
+        _.extend data, { clientJS }
+
+        content = swig.compileFile('index.html').render(data)
         res.send content
 
       app.listen PORT

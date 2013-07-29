@@ -1,15 +1,18 @@
+# Node dependencies
 crypto = require 'crypto'
 fs = require 'fs'
-less = require 'less'
-coffee = require 'coffee-script'
-_ = require 'underscore'
 
-# Monkey-patch some custom fns into Underscore
-_.mapObj = _.compose(_.object, _.map)
+# Third-party modules
+_ = require 'underscore'
+iced = require 'iced-coffee-script'
+less = require 'less'
+
+# Project-specific dependencies
+sharedUtil = require '../shared/util.coffee'
 
 
 Util =
-  compile: coffee.compile
+  compile: iced.compile
   
   compileCSS: less.render
 

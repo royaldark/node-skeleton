@@ -1,12 +1,32 @@
 fs = require 'fs'
+_ = require 'underscore'
+async = require 'async'
 Util = require './util.coffee'
 
 Packager =
-  packageCoffeeFiles: ->
-    coffeeContents = for file in fs.readdirSync './client' when file[-7..] == '.coffee'
-      fs.readFileSync("./client/#{ file }", 'utf8')
+  _getContents: (files, dir, extension, next) ->
+    index = -1 * extension.length
 
-    Util.compile coffeeContents.join('\n\n')
+    validFiles = _.filter files, (filename) -> filename[index..] == extension
+    console.dir validFiles
+
+    async.map validFiles, (filename, next) ->
+      fullFilename = "#{ dir }/#{ filename }"
+      fs.readFile fullFilename, 'utf8', next
+    , next
+
+  packageCoffeeFiles: (next) ->
+    await async.map ['./shared', './client'], fs.readdir, defer err, results
+    return next(err) if err
+
+    await async.parallel [
+      (next) -> Packager._getContents results[0], './shared', '.coffee', next
+      (next) -> Packager._getContents results[1], './client', '.coffee', next
+    ], defer err, contents
+    return next(err) if err
+    
+    compiled = Util.compile _.flatten(contents).join('\n\n')
+    next(null, compiled)
 
   packageTemplates: ->
     views = {}
