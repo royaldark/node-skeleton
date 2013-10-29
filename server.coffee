@@ -15,7 +15,6 @@ Util = require './server/util.coffee'
 Packager = require './server/packager.coffee'
 
 PORT = 3000
-SOCKETIO_PORT = 80
 
 # Dev swig opts (namely cache: false)
 swig.init
@@ -35,7 +34,7 @@ startServer = ->
   async.auto {
     initServer: (next) =>
       app = express()
-      socketIOServer = http.createServer(app).listen(SOCKETIO_PORT)
+      socketIOServer = http.createServer(app)
       next()
 
     socketIO: ['initServer', (next) =>
@@ -75,7 +74,7 @@ startServer = ->
         content = swig.compileFile('index.html').render(data)
         res.send content
 
-      app.listen PORT
+      socketIOServer.listen PORT
       next()
     ]
 
